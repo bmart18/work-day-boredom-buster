@@ -144,6 +144,15 @@ export class ExcelSkin implements Skin {
     }).join('')
 
     return `
+      <div class="xl-titlebar">
+        <div class="xl-titlebar-icon">&#128196;</div>
+        <span class="xl-titlebar-name">Snake.xlsx — Microsoft Excel</span>
+        <div class="xl-titlebar-controls">
+          <span class="xl-titlebar-btn xl-btn-min">&#8722;</span>
+          <span class="xl-titlebar-btn xl-btn-max">&#9633;</span>
+          <span class="xl-titlebar-btn xl-btn-close">&#10005;</span>
+        </div>
+      </div>
       <div class="xl-ribbon">
         <div class="xl-ribbon-tabs">
           <span class="xl-tab xl-tab-active">Home</span>
@@ -179,12 +188,13 @@ export class ExcelSkin implements Skin {
         <span>Ready</span>
         <span class="xl-status-score">Score: 0</span>
         <span class="xl-status-highscore">High Score: 0</span>
+        <span class="xl-status-hint">Esc: Switch game</span>
       </div>
       <div class="xl-gameover" style="display:none">
         <div class="xl-gameover-box">
           <h2>Game Over</h2>
           <p class="xl-gameover-score">Score: 0</p>
-          <p class="xl-gameover-hint">Press <strong>Enter</strong> to play again</p>
+          <p class="xl-gameover-hint">Press <strong>Enter</strong> to play again &nbsp;·&nbsp; <strong>Esc</strong> to switch game</p>
         </div>
       </div>
     `
@@ -208,6 +218,38 @@ export class ExcelSkin implements Skin {
         position: relative;
         background: #f0f0f0;
       }
+
+      /* ── Title bar ─────────────────────────────────────────── */
+      .xl-titlebar {
+        background: #217346;
+        display: flex;
+        align-items: center;
+        height: 28px;
+        padding: 0 8px;
+        flex-shrink: 0;
+        gap: 6px;
+      }
+      .xl-titlebar-icon { font-size: 14px; }
+      .xl-titlebar-name {
+        flex: 1;
+        text-align: center;
+        font-size: 11px;
+        color: rgba(255,255,255,0.9);
+        font-family: 'Segoe UI', Arial, sans-serif;
+      }
+      .xl-titlebar-controls { display: flex; gap: 2px; }
+      .xl-titlebar-btn {
+        width: 26px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.8);
+        border-radius: 3px;
+        cursor: default;
+      }
+      .xl-titlebar-btn:hover { background: rgba(255,255,255,0.15); }
+      .xl-btn-close:hover { background: #c42b1c; color: #fff; }
 
       /* ── Ribbon ────────────────────────────────────────────── */
       .xl-ribbon {
@@ -369,6 +411,10 @@ export class ExcelSkin implements Skin {
         padding: 2px 10px;
         font-size: 11px;
         flex-shrink: 0;
+      }
+      .xl-status-hint {
+        opacity: 0.65;
+        font-style: italic;
       }
 
       /* ── Game-over overlay ─────────────────────────────────── */

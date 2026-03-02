@@ -197,10 +197,10 @@ This allows:
 - [x] Add difficulty ramp  
 
 ### Phase 5 — Polish
-- [ ] Skin switching system  
-- [ ] Visual realism improvements  
-- [ ] Performance optimization  
-- [ ] Static deployment  
+- [x] Skin switching system  
+- [x] Visual realism improvements  
+- [x] Performance optimization  
+- [x] Static deployment  
 
 ---
 
