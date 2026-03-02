@@ -186,10 +186,10 @@ This allows:
 - [x] Implement scoring framework  
 
 ### Phase 3 — First Game Implementation
-- [ ] Implement Snake logic (grid-based)  
-- [ ] Build Excel skin grid renderer  
-- [ ] Bind arrow input to movement  
-- [ ] Add collision + scoring  
+- [x] Implement Snake logic (grid-based)  
+- [x] Build Excel skin grid renderer  
+- [x] Bind arrow input to movement  
+- [x] Add collision + scoring  
 
 ### Phase 4 — Second Game
 - [ ] Implement typing game engine  
