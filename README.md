@@ -180,10 +180,10 @@ This allows:
 - [x] Define Skin interface contract  
 
 ### Phase 2 — Engine Core
-- [ ] Build deterministic tick system  
-- [ ] Implement global state machine  
-- [ ] Create input router  
-- [ ] Implement scoring framework  
+- [x] Build deterministic tick system  
+- [x] Implement global state machine  
+- [x] Create input router  
+- [x] Implement scoring framework  
 
 ### Phase 3 — First Game Implementation
 - [ ] Implement Snake logic (grid-based)  
