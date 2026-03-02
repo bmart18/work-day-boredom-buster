@@ -196,3 +196,37 @@ describe('SnakeGame – reset', () => {
     expect(game.score).toBe(0)
   })
 })
+
+describe('SnakeGame – dirty flag', () => {
+  it('starts dirty on construction', () => {
+    const game = new SnakeGame(5, 5, 1)
+    expect(game.dirty).toBe(true)
+  })
+
+  it('consumeDirty() returns true and clears the flag', () => {
+    const game = new SnakeGame(5, 5, 1)
+    expect(game.consumeDirty()).toBe(true)
+    expect(game.dirty).toBe(false)
+  })
+
+  it('stays clean between ticks that do not trigger a move', () => {
+    const game = new SnakeGame(5, 5, 3)
+    game.consumeDirty() // clear initial dirty
+    game.tick() // stepCounter = 1, no move yet
+    expect(game.dirty).toBe(false)
+  })
+
+  it('becomes dirty when a move occurs', () => {
+    const game = new SnakeGame(5, 5, 1)
+    game.consumeDirty() // clear initial dirty
+    advanceOnce(game)   // triggers a move
+    expect(game.dirty).toBe(true)
+  })
+
+  it('reset() sets dirty to true', () => {
+    const game = new SnakeGame(5, 5, 1)
+    game.consumeDirty()
+    game.reset()
+    expect(game.dirty).toBe(true)
+  })
+})

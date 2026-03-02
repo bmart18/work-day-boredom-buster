@@ -51,6 +51,7 @@ export class SnakeGame {
   private _score: number
   private _status: SnakeStatus
   private stepCounter: number
+  private _dirty: boolean
   readonly rows: number
   readonly cols: number
   readonly stepsPerMove: number
@@ -71,6 +72,7 @@ export class SnakeGame {
     this._score = 0
     this._status = 'running'
     this.stepCounter = 0
+    this._dirty = true
     this.reset()
   }
 
@@ -80,6 +82,21 @@ export class SnakeGame {
 
   get status(): SnakeStatus {
     return this._status
+  }
+
+  /**
+   * True when the game state has changed since the last `consumeDirty()` call.
+   * Use this to skip redundant renders.
+   */
+  get dirty(): boolean {
+    return this._dirty
+  }
+
+  /** Clears the dirty flag and returns its previous value. */
+  consumeDirty(): boolean {
+    const was = this._dirty
+    this._dirty = false
+    return was
   }
 
   /**
@@ -99,6 +116,7 @@ export class SnakeGame {
     this._score = 0
     this._status = 'running'
     this.stepCounter = 0
+    this._dirty = true
     this.spawnFood()
   }
 
@@ -121,6 +139,7 @@ export class SnakeGame {
     this.stepCounter++
     if (this.stepCounter < this.stepsPerMove) return
     this.stepCounter = 0
+    this._dirty = true
     this.move()
   }
 

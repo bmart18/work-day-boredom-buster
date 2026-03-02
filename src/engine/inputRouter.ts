@@ -5,6 +5,7 @@ export const GameInput = {
   Right: 3,
   Confirm: 4,
   TypeCharacter: 5,
+  Escape: 6,
 } as const
 
 export type GameInput = (typeof GameInput)[keyof typeof GameInput]
@@ -39,6 +40,9 @@ export class InputRouter {
         break
       case 'ArrowRight':
         this.handler(GameInput.Right)
+        break
+      case 'Escape':
+        this.handler(GameInput.Escape)
         break
       case 'Enter':
         this.handler(GameInput.Confirm)

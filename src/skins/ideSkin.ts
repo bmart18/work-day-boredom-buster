@@ -226,6 +226,7 @@ export class IdeSkin implements Skin {
           <span class="ide-stat-score">Score: 0</span>
           <span class="ide-stat-timer">⏱ 60s</span>
           <span>TypeScript</span>
+          <span class="ide-stat-hint">Esc: Switch game</span>
         </span>
       </div>
       <div class="ide-gameover" style="display:none">
@@ -233,7 +234,7 @@ export class IdeSkin implements Skin {
           <h2>Time's Up</h2>
           <p class="ide-gameover-score">Score: 0</p>
           <p class="ide-gameover-wpm">Peak WPM: 0</p>
-          <p class="ide-gameover-hint">Press <strong>Enter</strong> to play again</p>
+          <p class="ide-gameover-hint">Press <strong>Enter</strong> to play again &nbsp;·&nbsp; <strong>Esc</strong> to switch game</p>
         </div>
       </div>
     `
@@ -478,6 +479,7 @@ export class IdeSkin implements Skin {
         align-items: center;
       }
       .ide-branch { opacity: 0.9; }
+      .ide-stat-hint { opacity: 0.65; font-style: italic; }
 
       /* ── Game-over overlay ──────────────────────────────── */
       .ide-gameover {

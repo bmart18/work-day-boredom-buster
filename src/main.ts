@@ -83,10 +83,20 @@ function startSnake(): void {
 
   let lastScore = 0
 
+  function teardown(): void {
+    loop.stop()
+    inputRouter.unbind()
+    excelSkin.destroy()
+    showSelector()
+  }
+
   const loop = new GameLoop((_delta: number) => {
     if (stateMachine.state !== GameStatus.Running) return
 
     snakeGame.tick()
+
+    // Skip render when nothing has changed (performance optimization)
+    if (!snakeGame.consumeDirty()) return
 
     const state = snakeGame.getState()
 
@@ -105,6 +115,10 @@ function startSnake(): void {
 
   const inputRouter = new InputRouter()
   inputRouter.bind((input: GameInput) => {
+    if (input === GameInput.Escape) {
+      teardown()
+      return
+    }
     if (stateMachine.state === GameStatus.Running) {
       if (input === GameInput.Up) snakeGame.setDirection('Up')
       else if (input === GameInput.Down) snakeGame.setDirection('Down')
@@ -142,6 +156,13 @@ function startTyping(): void {
 
   ideSkin.initialize()
 
+  function teardown(): void {
+    loop.stop()
+    inputRouter.unbind()
+    ideSkin.destroy()
+    showSelector()
+  }
+
   const loop = new GameLoop((delta: number) => {
     if (stateMachine.state !== GameStatus.Running) return
 
@@ -157,6 +178,10 @@ function startTyping(): void {
 
   const inputRouter = new InputRouter()
   inputRouter.bind((input: GameInput, char?: string) => {
+    if (input === GameInput.Escape) {
+      teardown()
+      return
+    }
     if (stateMachine.state === GameStatus.Running) {
       if (input === GameInput.TypeCharacter && char !== undefined) {
         typingGame.type(char)
