@@ -192,9 +192,9 @@ This allows:
 - [x] Add collision + scoring  
 
 ### Phase 4 — Second Game
-- [ ] Implement typing game engine  
-- [ ] Build IDE-style skin  
-- [ ] Add difficulty ramp  
+- [x] Implement typing game engine  
+- [x] Build IDE-style skin  
+- [x] Add difficulty ramp  
 
 ### Phase 5 — Polish
 - [ ] Skin switching system  
