@@ -118,3 +118,104 @@ interface Skin {
   bindInput(callback: InputEventHandler): void
   destroy(): void
 }
+```
+
+The skin only knows how to visually render state.  
+It does not compute it.
+
+---
+
+### 3. Input Routing
+
+Keyboard and mouse events are intercepted and translated into:
+
+```ts
+enum GameInput {
+  Up,
+  Down,
+  Left,
+  Right,
+  Confirm,
+  TypeCharacter,
+}
+```
+
+This allows:
+
+- Arrow keys → Snake movement  
+- Typing letters → Word speed test  
+- Clicking cells → Action trigger  
+
+---
+
+## Example First Game Concepts
+
+### Excel Snake
+
+- Spreadsheet grid rendered as realistic Excel  
+- Snake occupies cell coordinates  
+- Cells visually “fill” to simulate movement  
+- Fake formulas and headers surround the grid  
+- Movement controlled via arrow keys  
+- Growth + collision logic handled by engine  
+
+### IDE Typing Sprint
+
+- IDE interface with line numbers  
+- Random code snippets generated  
+- Player must type code accurately  
+- Syntax highlighting illusion  
+- Score based on WPM + accuracy  
+
+---
+
+## Roadmap
+
+### Phase 0 — Foundation
+- [x] Create README  
+
+### Phase 1 — Project Initialization
+- [ ] Initialize Vite + TypeScript  
+- [ ] Implement base game loop  
+- [ ] Define Skin interface contract  
+
+### Phase 2 — Engine Core
+- [ ] Build deterministic tick system  
+- [ ] Implement global state machine  
+- [ ] Create input router  
+- [ ] Implement scoring framework  
+
+### Phase 3 — First Game Implementation
+- [ ] Implement Snake logic (grid-based)  
+- [ ] Build Excel skin grid renderer  
+- [ ] Bind arrow input to movement  
+- [ ] Add collision + scoring  
+
+### Phase 4 — Second Game
+- [ ] Implement typing game engine  
+- [ ] Build IDE-style skin  
+- [ ] Add difficulty ramp  
+
+### Phase 5 — Polish
+- [ ] Skin switching system  
+- [ ] Visual realism improvements  
+- [ ] Performance optimization  
+- [ ] Static deployment  
+
+---
+
+## Deployment Plan
+
+Static deployment via:
+
+- GitHub Pages  
+- Netlify  
+- Vercel  
+
+No server required.
+
+---
+
+## License
+
+TBD
