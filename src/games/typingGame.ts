@@ -227,6 +227,9 @@ export class TypingGame {
   }
 
   private loadNextPrompt(): void {
+    // Accuracy and WPM are intentionally per-prompt: each snippet is scored
+    // independently, so the counters reset to give the player a clean slate
+    // for the next challenge.
     this._typed = ''
     this._promptStarted = false
     this._elapsedTypingMs = 0

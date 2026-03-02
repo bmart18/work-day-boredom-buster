@@ -230,7 +230,7 @@ export class IdeSkin implements Skin {
       </div>
       <div class="ide-gameover" style="display:none">
         <div class="ide-gameover-box">
-          <h2>Time&rsquo;s Up</h2>
+          <h2>Time's Up</h2>
           <p class="ide-gameover-score">Score: 0</p>
           <p class="ide-gameover-wpm">Peak WPM: 0</p>
           <p class="ide-gameover-hint">Press <strong>Enter</strong> to play again</p>
