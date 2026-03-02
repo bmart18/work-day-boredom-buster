@@ -3,65 +3,185 @@ import { InputRouter, GameInput } from './engine/inputRouter'
 import { StateMachine, GameStatus } from './engine/stateMachine'
 import { ScoreSystem } from './engine/scoreSystem'
 import { SnakeGame } from './games/snakeGame'
+import { TypingGame } from './games/typingGame'
 import { ExcelSkin } from './skins/excelSkin'
+import { IdeSkin } from './skins/ideSkin'
 
-const stateMachine = new StateMachine()
-const scoreSystem = new ScoreSystem()
-const snakeGame = new SnakeGame()
-const excelSkin = new ExcelSkin()
+// ── Game selector ─────────────────────────────────────────────────────────────
 
-excelSkin.initialize()
+const SELECTOR_ID = 'game-selector'
 
-let lastScore = 0
+function showSelector(): void {
+  const root = document.getElementById('app') ?? document.body
 
-const loop = new GameLoop((_delta: number) => {
-  if (stateMachine.state !== GameStatus.Running) return
+  const div = document.createElement('div')
+  div.id = SELECTOR_ID
+  div.innerHTML = `
+    <style>
+      #game-selector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        gap: 24px;
+      }
+      #game-selector h1 { font-size: 28px; margin: 0 0 8px; color: #4ec9b0; }
+      #game-selector p  { margin: 0; font-size: 14px; color: #858585; }
+      .gs-cards { display: flex; gap: 24px; margin-top: 16px; }
+      .gs-card {
+        background: #252526;
+        border: 1px solid #3c3c3c;
+        border-radius: 8px;
+        padding: 28px 36px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .15s, transform .1s;
+        min-width: 180px;
+      }
+      .gs-card:hover { border-color: #007acc; transform: translateY(-2px); }
+      .gs-card h2 { margin: 0 0 8px; font-size: 18px; color: #9cdcfe; }
+      .gs-card p  { margin: 0; font-size: 12px; color: #858585; }
+    </style>
+    <h1>Workday Boredom Buster</h1>
+    <p>Choose your disguise</p>
+    <div class="gs-cards">
+      <div class="gs-card" id="gs-snake">
+        <h2>🐍 Excel Snake</h2>
+        <p>Arrow keys · spreadsheet skin</p>
+      </div>
+      <div class="gs-card" id="gs-typing">
+        <h2>⌨️ IDE Typing Sprint</h2>
+        <p>Type code · difficulty ramp</p>
+      </div>
+    </div>
+  `
+  root.appendChild(div)
 
-  snakeGame.tick()
+  div.querySelector('#gs-snake')!.addEventListener('click', () => {
+    div.remove()
+    startSnake()
+  })
+  div.querySelector('#gs-typing')!.addEventListener('click', () => {
+    div.remove()
+    startTyping()
+  })
+}
 
-  const state = snakeGame.getState()
+// ── Snake (Excel skin) ────────────────────────────────────────────────────────
 
-  // Sync score delta into the shared ScoreSystem (for high-score tracking)
-  const delta = state.score - lastScore
-  if (delta > 0) {
-    scoreSystem.add(delta)
-    lastScore = state.score
-  }
+function startSnake(): void {
+  const stateMachine = new StateMachine()
+  const scoreSystem = new ScoreSystem()
+  const snakeGame = new SnakeGame()
+  const excelSkin = new ExcelSkin()
 
-  excelSkin.render({ ...state, highScore: scoreSystem.highScore })
+  excelSkin.initialize()
 
-  if (state.status === 'gameover') {
-    stateMachine.transition(GameStatus.GameOver)
-  }
-})
+  let lastScore = 0
 
-const inputRouter = new InputRouter()
-inputRouter.bind((input: GameInput) => {
-  if (stateMachine.state === GameStatus.Running) {
-    if (input === GameInput.Up) snakeGame.setDirection('Up')
-    else if (input === GameInput.Down) snakeGame.setDirection('Down')
-    else if (input === GameInput.Left) snakeGame.setDirection('Left')
-    else if (input === GameInput.Right) snakeGame.setDirection('Right')
-  } else if (stateMachine.state === GameStatus.GameOver && input === GameInput.Confirm) {
-    snakeGame.reset()
-    stateMachine.transition(GameStatus.Idle)
-    stateMachine.transition(GameStatus.Running)
-    loop.start()
-  }
-})
+  const loop = new GameLoop((_delta: number) => {
+    if (stateMachine.state !== GameStatus.Running) return
 
-stateMachine.onStateChange((_from, to) => {
-  if (to === GameStatus.GameOver) {
-    loop.stop()
-    // Final render so the overlay appears immediately
-    excelSkin.render({ ...snakeGame.getState(), highScore: scoreSystem.highScore })
-  }
-  if (to === GameStatus.Idle) {
-    scoreSystem.reset()
-    lastScore = 0
-  }
-})
+    snakeGame.tick()
 
-stateMachine.transition(GameStatus.Running)
-loop.start()
+    const state = snakeGame.getState()
+
+    const delta = state.score - lastScore
+    if (delta > 0) {
+      scoreSystem.add(delta)
+      lastScore = state.score
+    }
+
+    excelSkin.render({ ...state, highScore: scoreSystem.highScore })
+
+    if (state.status === 'gameover') {
+      stateMachine.transition(GameStatus.GameOver)
+    }
+  })
+
+  const inputRouter = new InputRouter()
+  inputRouter.bind((input: GameInput) => {
+    if (stateMachine.state === GameStatus.Running) {
+      if (input === GameInput.Up) snakeGame.setDirection('Up')
+      else if (input === GameInput.Down) snakeGame.setDirection('Down')
+      else if (input === GameInput.Left) snakeGame.setDirection('Left')
+      else if (input === GameInput.Right) snakeGame.setDirection('Right')
+    } else if (stateMachine.state === GameStatus.GameOver && input === GameInput.Confirm) {
+      snakeGame.reset()
+      stateMachine.transition(GameStatus.Idle)
+      stateMachine.transition(GameStatus.Running)
+      loop.start()
+    }
+  })
+
+  stateMachine.onStateChange((_from, to) => {
+    if (to === GameStatus.GameOver) {
+      loop.stop()
+      excelSkin.render({ ...snakeGame.getState(), highScore: scoreSystem.highScore })
+    }
+    if (to === GameStatus.Idle) {
+      scoreSystem.reset()
+      lastScore = 0
+    }
+  })
+
+  stateMachine.transition(GameStatus.Running)
+  loop.start()
+}
+
+// ── Typing Sprint (IDE skin) ──────────────────────────────────────────────────
+
+function startTyping(): void {
+  const stateMachine = new StateMachine()
+  const typingGame = new TypingGame()
+  const ideSkin = new IdeSkin()
+
+  ideSkin.initialize()
+
+  const loop = new GameLoop((delta: number) => {
+    if (stateMachine.state !== GameStatus.Running) return
+
+    typingGame.tick(delta)
+
+    const state = typingGame.getState()
+    ideSkin.render(state as unknown as import('./skins/Skin').GameState)
+
+    if (state.status === 'gameover') {
+      stateMachine.transition(GameStatus.GameOver)
+    }
+  })
+
+  const inputRouter = new InputRouter()
+  inputRouter.bind((input: GameInput, char?: string) => {
+    if (stateMachine.state === GameStatus.Running) {
+      if (input === GameInput.TypeCharacter && char !== undefined) {
+        typingGame.type(char)
+      }
+    } else if (stateMachine.state === GameStatus.GameOver && input === GameInput.Confirm) {
+      typingGame.reset()
+      stateMachine.transition(GameStatus.Idle)
+      stateMachine.transition(GameStatus.Running)
+      loop.start()
+    }
+  })
+
+  stateMachine.onStateChange((_from, to) => {
+    if (to === GameStatus.GameOver) {
+      loop.stop()
+      // Final render so the overlay appears immediately
+      ideSkin.render(typingGame.getState() as unknown as import('./skins/Skin').GameState)
+    }
+  })
+
+  stateMachine.transition(GameStatus.Running)
+  loop.start()
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+
+showSelector()
 
