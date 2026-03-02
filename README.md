@@ -175,9 +175,9 @@ This allows:
 - [x] Create README  
 
 ### Phase 1 — Project Initialization
-- [ ] Initialize Vite + TypeScript  
-- [ ] Implement base game loop  
-- [ ] Define Skin interface contract  
+- [x] Initialize Vite + TypeScript  
+- [x] Implement base game loop  
+- [x] Define Skin interface contract  
 
 ### Phase 2 — Engine Core
 - [ ] Build deterministic tick system  
