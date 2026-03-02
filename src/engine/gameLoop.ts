@@ -4,6 +4,13 @@ export type TickCallback = (delta: number) => void
 const DEFAULT_TICK_MS = 1000 / 60
 
 /**
+ * Maximum number of ticks that can be drained in a single animation frame.
+ * Capping the accumulator prevents a "spiral of death" when the browser tab
+ * has been backgrounded (and RAF throttled) for an extended period.
+ */
+const MAX_TICKS_PER_FRAME = 8
+
+/**
  * GameLoop drives the game at a deterministic fixed tick rate.
  *
  * Elapsed time is accumulated on each animation frame and the tick callback
@@ -52,6 +59,13 @@ export class GameLoop {
     const elapsed = timestamp - this.lastTimestamp
     this.lastTimestamp = timestamp
     this.accumulator += elapsed
+
+    // Cap the accumulator to prevent a "spiral of death" after the tab has
+    // been backgrounded and RAF was throttled to a very low rate.
+    const maxAccumulatedMs = this.tickMs * MAX_TICKS_PER_FRAME
+    if (this.accumulator > maxAccumulatedMs) {
+      this.accumulator = maxAccumulatedMs
+    }
 
     while (this.accumulator >= this.tickMs) {
       this.tickCallback(this.tickMs)

@@ -85,6 +85,22 @@ describe('GameLoop', () => {
     expect(tick).not.toHaveBeenCalled()
   })
 
+  it('caps accumulated time to prevent spiral-of-death on tab re-focus', () => {
+    const TICK_MS = 100
+    const tick = vi.fn()
+    const loop = new GameLoop(tick, TICK_MS)
+    loop.start()
+
+    // First frame sets lastTimestamp
+    flushFrames([0])
+    expect(tick).not.toHaveBeenCalled()
+
+    // Simulate a very long gap (10 seconds — tab was backgrounded)
+    // MAX_TICKS_PER_FRAME = 8, so at most 8 ticks should fire
+    flushFrames([10_000])
+    expect(tick.mock.calls.length).toBeLessThanOrEqual(8)
+  })
+
   it('does not fire ticks after stop()', () => {
     const TICK_MS = 50
     const tick = vi.fn()

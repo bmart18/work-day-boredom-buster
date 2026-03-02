@@ -82,4 +82,55 @@ describe('InputRouter', () => {
     expect(first).not.toHaveBeenCalled()
     expect(second).toHaveBeenCalledWith(GameInput.Confirm)
   })
+
+  describe('preventDefault', () => {
+    function fireKeyWithSpy(key: string): { preventDefault: ReturnType<typeof vi.fn> } {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+      const spy = vi.spyOn(event, 'preventDefault')
+      window.dispatchEvent(event)
+      return { preventDefault: spy }
+    }
+
+    it('prevents default for ArrowUp', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('ArrowUp')
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('prevents default for ArrowDown', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('ArrowDown')
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('prevents default for ArrowLeft', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('ArrowLeft')
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('prevents default for ArrowRight', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('ArrowRight')
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('prevents default for Enter', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('Enter')
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('does not prevent default for Escape', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('Escape')
+      expect(preventDefault).not.toHaveBeenCalled()
+    })
+
+    it('does not prevent default for printable characters', () => {
+      router.bind(vi.fn())
+      const { preventDefault } = fireKeyWithSpy('a')
+      expect(preventDefault).not.toHaveBeenCalled()
+    })
+  })
 })

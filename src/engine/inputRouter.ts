@@ -30,21 +30,26 @@ export class InputRouter {
     if (!this.handler) return
     switch (event.key) {
       case 'ArrowUp':
+        event.preventDefault()
         this.handler(GameInput.Up)
         break
       case 'ArrowDown':
+        event.preventDefault()
         this.handler(GameInput.Down)
         break
       case 'ArrowLeft':
+        event.preventDefault()
         this.handler(GameInput.Left)
         break
       case 'ArrowRight':
+        event.preventDefault()
         this.handler(GameInput.Right)
         break
       case 'Escape':
         this.handler(GameInput.Escape)
         break
       case 'Enter':
+        event.preventDefault()
         this.handler(GameInput.Confirm)
         break
       default:
