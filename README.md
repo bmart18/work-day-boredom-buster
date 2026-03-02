@@ -1,108 +1,120 @@
 # Workday Boredom Buster
 
-Workday Boredom Buster is a browser-based interactive application disguised as legitimate productivity software. Users appear to be working inside professional environments (spreadsheets, IDEs, technical consoles, etc.) while actually engaging with a lightweight, client-side game.
+Workday Boredom Buster is a browser-based game engine that disguises interactive gameplay inside realistic professional software environments.
 
-The application runs entirely in the browser and requires no backend infrastructure, no database, and no persistent storage.
+The application renders convincing productivity interfaces (spreadsheets, IDEs, technical consoles, etc.), while entirely unrelated game mechanics operate beneath the surface.
+
+The illusion is visual. The mechanics are real.
+
+The application runs fully client-side with no backend, no persistence, and no telemetry.
 
 ---
 
 ## Project Vision
 
-The goal of Workday Boredom Buster is to:
+Workday Boredom Buster aims to:
 
-- Simulate realistic professional software environments
-- Respond to real user typing and clicking
-- Provide hidden game mechanics beneath convincing “work” interfaces
-- Remain lightweight and statically deployable
-- Support multiple visual skins with shared core logic
+- Render highly convincing professional UI environments  
+- Host real-time game loops inside those environments  
+- Allow gameplay mechanics that are unrelated to the visual metaphor  
+- Support multiple skins powered by a shared deterministic engine  
+- Remain lightweight and statically deployable  
+
+Example concepts:
+
+- Snake rendered inside Excel cells  
+- Typing speed game disguised as writing code in an IDE  
+- Pattern-matching game embedded in a financial dashboard  
+- Grid-based logic puzzles inside a spreadsheet  
+
+---
+
+## Design Philosophy
+
+The system separates three concerns:
+
+1. Game Engine — deterministic mechanics, timing, scoring  
+2. Skin Layer — professional UI illusion  
+3. Input Layer — intercepts user interaction and routes to engine  
+
+The skins never contain game logic.  
+The engine never knows what skin is active.
 
 ---
 
 ## Core Principles
 
-- 100% client-side
-- No backend services
-- No user tracking
-- No data persistence
-- Modular architecture
-- Clean separation between engine logic and UI skins
-- AI-friendly code structure
+- 100% client-side  
+- No backend services  
+- No user tracking  
+- No data persistence  
+- Deterministic tick-based game loop  
+- Modular skin architecture  
+- Clean separation between engine logic and UI illusion  
+- AI-friendly code structure  
 
 ---
 
 ## Proposed Tech Stack
 
-- TypeScript
-- Vite
-- Modular CSS
-- No frontend frameworks (no React, Vue, etc.)
-- Static hosting deployment
+- TypeScript  
+- Vite  
+- Modular CSS  
+- No frontend frameworks  
+- requestAnimationFrame-based loop  
+- Static hosting deployment  
 
 ---
 
 ## High-Level Architecture
-/src
-main.ts
-engine/
-stateMachine.ts
-interactionEngine.ts
-skins/
-excelSkin.ts
-matlabSkin.ts
-ideSkin.ts
-ui/
-renderer.ts
-utils/
-random.ts
 
-
----
-
-## Roadmap
-
-### Phase 0 — Foundation
-- [x] Create README
-
-### Phase 1 — Project Initialization
-- [ ] Initialize Vite + TypeScript project
-- [ ] Configure project folder structure
-- [ ] Establish build configuration
-
-### Phase 2 — Core Engine
-- [ ] Implement global state machine
-- [ ] Build interaction engine
-- [ ] Define skin interface contract
-
-### Phase 3 — Initial Skins
-- [ ] Excel-style interface skin
-- [ ] IDE-style interface skin
-- [ ] MATLAB-style console skin
-
-### Phase 4 — Game Mechanics Layer
-- [ ] Hidden scoring system
-- [ ] Dynamic event generation
-- [ ] Interaction feedback engine
-
-### Phase 5 — Polish & Deployment
-- [ ] Skin switching system
-- [ ] Performance optimization
-- [ ] Final UI refinement
-- [ ] Static deployment configuration
+/src  
+main.ts  
+engine/  
+ gameLoop.ts  
+ stateMachine.ts  
+ inputRouter.ts  
+ scoreSystem.ts  
+games/  
+ snakeGame.ts  
+ typingGame.ts  
+skins/  
+ excelSkin.ts  
+ ideSkin.ts  
+ matlabSkin.ts  
+ui/  
+ renderer.ts  
+utils/  
+ random.ts  
+ gridMath.ts  
 
 ---
 
-## Deployment Plan
+## Core System Layers
 
-The application will be deployed as a static site using:
+### 1. Game Engine
 
-- GitHub Pages
-- Netlify
-- Vercel
+Responsible for:
 
-No server dependencies required.
+- Tick loop (requestAnimationFrame)  
+- Time delta management  
+- Game state transitions  
+- Collision detection  
+- Scoring  
+- Difficulty scaling  
+
+The engine is completely UI-agnostic.
 
 ---
 
-## License
+### 2. Skin Interface Contract
 
-TBD
+Every skin must implement:
+
+```ts
+interface Skin {
+  initialize(): void
+  render(gameState: GameState): void
+  bindInput(callback: InputEventHandler): void
+  destroy(): void
+}
