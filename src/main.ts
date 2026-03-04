@@ -4,8 +4,10 @@ import { StateMachine, GameStatus } from './engine/stateMachine'
 import { ScoreSystem } from './engine/scoreSystem'
 import { SnakeGame } from './games/snakeGame'
 import { TypingGame } from './games/typingGame'
+import { SolitaireGame } from './games/solitaireGame'
 import { ExcelSkin } from './skins/excelSkin'
 import { IdeSkin } from './skins/ideSkin'
+import { JiraSkin } from './skins/jiraSkin'
 
 // ── Game selector ─────────────────────────────────────────────────────────────
 
@@ -58,6 +60,10 @@ function showSelector(): void {
         <h2>IDE Typing Sprint</h2>
         <p>Type code · difficulty ramp</p>
       </div>
+      <div class="gs-card" id="gs-solitaire">
+        <h2>Jira Solitaire</h2>
+        <p>Click cards · Kanban board skin</p>
+      </div>
     </div>
   `
   root.appendChild(div)
@@ -69,6 +75,10 @@ function showSelector(): void {
   div.querySelector('#gs-typing')!.addEventListener('click', () => {
     div.remove()
     startTyping()
+  })
+  div.querySelector('#gs-solitaire')!.addEventListener('click', () => {
+    div.remove()
+    startSolitaire()
   })
 }
 
@@ -209,6 +219,40 @@ function startTyping(): void {
 
   stateMachine.transition(GameStatus.Running)
   loop.start()
+}
+
+// ── Jira Solitaire ────────────────────────────────────────────────────────────
+
+function startSolitaire(): void {
+  const game = new SolitaireGame()
+  const skin = new JiraSkin()
+
+  skin.initialize()
+
+  function render(): void {
+    skin.render(game.getState() as unknown as import('./skins/Skin').GameState)
+  }
+
+  skin.setActionHandler((pile, pileIndex, cardIndex, isDouble) => {
+    if (isDouble) {
+      game.doubleClick(pile, pileIndex)
+    } else {
+      game.click(pile, pileIndex, cardIndex)
+    }
+    render()
+  })
+
+  skin.setExitHandler(() => {
+    skin.destroy()
+    showSelector()
+  })
+
+  skin.setRestartHandler(() => {
+    game.reset()
+    render()
+  })
+
+  render()
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
