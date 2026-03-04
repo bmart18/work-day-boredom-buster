@@ -113,6 +113,10 @@ export class IdeSkin implements Skin {
     if (this.difficultyEl) this.difficultyEl.textContent = difficultyLabel(difficulty)
     if (this.timerEl) this.timerEl.textContent = `⏱ ${formatTime(timeRemainingMs)}`
 
+    // Update max time reference when difficulty changes (60/50/40 s)
+    const capMs = difficulty === 3 ? 40_000 : difficulty === 2 ? 50_000 : 60_000
+    this.maxTimeMs = capMs
+
     // Timer bar
     if (this.timerBarEl) {
       const pct = Math.max(0, Math.min(100, (timeRemainingMs / this.maxTimeMs) * 100))
@@ -120,10 +124,6 @@ export class IdeSkin implements Skin {
       // Colour shifts red as time runs low
       this.timerBarEl.style.background = pct > 40 ? '#4ec9b0' : pct > 15 ? '#e5c07b' : '#e06c75'
     }
-
-    // Update max time reference when difficulty changes (60/50/40 s)
-    const capMs = difficulty === 3 ? 40_000 : difficulty === 2 ? 50_000 : 60_000
-    this.maxTimeMs = capMs
 
     // Game-over overlay
     if (this.gameOverEl) {
