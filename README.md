@@ -20,50 +20,6 @@ Workday Boredom Buster aims to:
 - Support multiple skins powered by a shared deterministic engine  
 - Remain lightweight and statically deployable  
 
-Example concepts:
-
-- Snake rendered inside Excel cells  
-- Typing speed game disguised as writing code in an IDE  
-- Pattern-matching game embedded in a financial dashboard  
-- Grid-based logic puzzles inside a spreadsheet  
-
----
-
-## Design Philosophy
-
-The system separates three concerns:
-
-1. Game Engine — deterministic mechanics, timing, scoring  
-2. Skin Layer — professional UI illusion  
-3. Input Layer — intercepts user interaction and routes to engine  
-
-The skins never contain game logic.  
-The engine never knows what skin is active.
-
----
-
-## Core Principles
-
-- 100% client-side  
-- No backend services  
-- No user tracking  
-- No data persistence  
-- Deterministic tick-based game loop  
-- Modular skin architecture  
-- Clean separation between engine logic and UI illusion  
-- AI-friendly code structure  
-
----
-
-## Proposed Tech Stack
-
-- TypeScript  
-- Vite  
-- Modular CSS  
-- No frontend frameworks  
-- requestAnimationFrame-based loop  
-- Static hosting deployment  
-
 ---
 
 ## High-Level Architecture
@@ -218,4 +174,4 @@ No server required.
 
 ## License
 
-TBD
+I.D.K.
