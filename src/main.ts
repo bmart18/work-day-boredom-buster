@@ -50,11 +50,11 @@ function showSelector(): void {
     <p>Choose your disguise</p>
     <div class="gs-cards">
       <div class="gs-card" id="gs-snake">
-        <h2>🐍 Excel Snake</h2>
+        <h2>Excel Snake</h2>
         <p>Arrow keys · spreadsheet skin</p>
       </div>
       <div class="gs-card" id="gs-typing">
-        <h2>⌨️ IDE Typing Sprint</h2>
+        <h2>IDE Typing Sprint</h2>
         <p>Type code · difficulty ramp</p>
       </div>
     </div>
