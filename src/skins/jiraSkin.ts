@@ -148,23 +148,27 @@ function renderCardFace(card: Card, selected: boolean, compact: boolean): string
 
 /**
  * Renders a face-down card as an unrevealed Jira ticket.
- * The issue number slot shows "WORK-?????" so it blends into the board;
- * placeholder bars replace the title and footer.
- * The card is the same slim height as face-up cards so the board looks uniform.
+ * The real issue type, title, assignee and story points are shown exactly as
+ * on a face-up card, but the indicator shows "WORK-?????" (not the real
+ * suit/rank code) so the card's identity stays hidden until it is flipped.
  */
-function renderCardBack(): string {
+function renderCardBack(card: Card): string {
+  const title  = cardTitle(card)
+  const points = storyPoints(card)
+  const { init, bg } = assigneeOf(card)
+  const issue  = ISSUE_TYPE[card.suit]
+
   return `
-    <div class="jira-card jira-card--hidden">
+    <div class="jira-card jira-card--face jira-card--hidden">
       <div class="jira-card__top-row">
-        <span class="jira-card__issue-type jira-card__issue-type--hidden">● Unrefined</span>
+        <span class="jira-card__issue-type" style="color:${issue.colour}"
+          >${issue.icon} ${issue.label}</span>
         <span class="jira-card__indicator jira-card__indicator--hidden">WORK-?????</span>
       </div>
-      <div class="jira-card__title jira-card__title--hidden">
-        <span class="jira-ph jira-ph--long"></span>
-      </div>
+      <div class="jira-card__title">${title}</div>
       <div class="jira-card__bottom-row">
-        <span class="jira-ph jira-ph--avatar"></span>
-        <span class="jira-ph jira-ph--sm"></span>
+        <span class="jira-card__avatar" style="background:${bg}">${init}</span>
+        <span class="jira-card__points">${points} sp</span>
       </div>
     </div>
   `
@@ -250,7 +254,7 @@ export class JiraSkin implements Skin {
   private buildShell(): string {
     const foundations = SUITS.map((suit, i) => `
       <div class="jira-deck__section">
-        <div class="jira-deck__label" style="color:${SUIT_COLOUR[suit]}">${SUIT_SYMBOL[suit]} ${suit}</div>
+        <div class="jira-deck__label">${SUIT_CODE[suit]}</div>
         <div class="jira-foundation-slot"
              data-pile="foundation" data-pile-index="${i}" data-card-index="-1">
           ${renderEmptySlot(SUIT_SYMBOL[suit], `color:${SUIT_COLOUR[suit]};font-size:20px`)}
@@ -348,10 +352,11 @@ export class JiraSkin implements Skin {
     const stockSlot = this.container.querySelector('.jira-stock-slot')
     if (stockSlot) {
       if (state.stock.length > 0) {
+        const topStock = state.stock[state.stock.length - 1]
         stockSlot.innerHTML = `
           <div data-pile="stock" data-pile-index="0" data-card-index="0"
                class="jira-stock-wrap">
-            ${renderCardBack()}
+            ${renderCardBack(topStock)}
             <span class="jira-stock-count">${state.stock.length}</span>
           </div>
         `
@@ -438,7 +443,7 @@ export class JiraSkin implements Skin {
                data-pile="tableau" data-pile-index="${col}" data-card-index="${idx}">
             ${card.faceUp
               ? renderCardFace(card, isSel, true)
-              : renderCardBack()}
+              : renderCardBack(card)}
           </div>
         `
       }).join('')
@@ -716,40 +721,24 @@ export class JiraSkin implements Skin {
       }
 
       /* ── Face-down card (unrevealed Jira ticket) ──────────────────────────── */
+      /* Same layout as face-up; just a subtle background tint to signal "not yet revealed". */
       .jira-card--hidden {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        padding: 6px 8px 5px;
         background: #FAFBFC;
         cursor: default;
       }
 
-      .jira-card__issue-type--hidden { color: #B3BAC5; }
-
+      /* The "WORK-?????" indicator on face-down cards — greyed out */
       .jira-card__indicator--hidden {
         font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', Menlo, monospace;
         font-size: 10px;
         font-weight: 700;
         letter-spacing: .04em;
-        color: #B3BAC5;
+        color: #97A0AF;
         padding: 1px 4px;
         border-radius: 3px;
         background: #F4F5F7;
         border: 1px solid #EBECF0;
       }
-
-      .jira-card__title--hidden { display: flex; align-items: center; }
-
-      /* Placeholder bars that mimic text skeleton */
-      .jira-ph {
-        display: inline-block;
-        background: #DFE1E6;
-        border-radius: 3px;
-      }
-      .jira-ph--long   { width: 80%; height: 9px; }
-      .jira-ph--avatar { width: 16px; height: 16px; border-radius: 50%; }
-      .jira-ph--sm     { width: 32px; height: 8px; }
 
       /* ── Recycle card ─────────────────────────────────────────────────────── */
       .jira-card--recycle {
