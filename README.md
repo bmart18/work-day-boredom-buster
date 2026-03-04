@@ -180,27 +180,27 @@ This allows:
 - [x] Define Skin interface contract  
 
 ### Phase 2 — Engine Core
-- [ ] Build deterministic tick system  
-- [ ] Implement global state machine  
-- [ ] Create input router  
-- [ ] Implement scoring framework  
+- [x] Build deterministic tick system  
+- [x] Implement global state machine  
+- [x] Create input router  
+- [x] Implement scoring framework  
 
 ### Phase 3 — First Game Implementation
-- [ ] Implement Snake logic (grid-based)  
-- [ ] Build Excel skin grid renderer  
-- [ ] Bind arrow input to movement  
-- [ ] Add collision + scoring  
+- [x] Implement Snake logic (grid-based)  
+- [x] Build Excel skin grid renderer  
+- [x] Bind arrow input to movement  
+- [x] Add collision + scoring  
 
 ### Phase 4 — Second Game
-- [ ] Implement typing game engine  
-- [ ] Build IDE-style skin  
-- [ ] Add difficulty ramp  
+- [x] Implement typing game engine  
+- [x] Build IDE-style skin  
+- [x] Add difficulty ramp  
 
 ### Phase 5 — Polish
-- [ ] Skin switching system  
-- [ ] Visual realism improvements  
-- [ ] Performance optimization  
-- [ ] Static deployment  
+- [x] Skin switching system  
+- [x] Visual realism improvements  
+- [x] Performance optimization  
+- [x] Static deployment  
 
 ---
 
