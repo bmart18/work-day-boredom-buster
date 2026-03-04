@@ -18,33 +18,34 @@ function showSelector(): void {
   div.id = SELECTOR_ID
   div.innerHTML = `
     <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; background: #1e1e1e; }
       #game-selector {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100vh;
-        font-family: 'Segoe UI', Arial, sans-serif;
+        font-family: 'Bahnschrift', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         background: #1e1e1e;
         color: #d4d4d4;
-        gap: 24px;
+        gap: 32px;
       }
-      #game-selector h1 { font-size: 28px; margin: 0 0 8px; color: #4ec9b0; }
-      #game-selector p  { margin: 0; font-size: 14px; color: #858585; }
-      .gs-cards { display: flex; gap: 24px; margin-top: 16px; }
+      #game-selector h1 { font-size: 48px; margin: 0 0 8px; color: #4ec9b0; letter-spacing: 0.04em; }
+      #game-selector p  { margin: 0; font-size: 18px; color: #858585; }
+      .gs-cards { display: flex; gap: 40px; margin-top: 24px; }
       .gs-card {
         background: #252526;
         border: 1px solid #3c3c3c;
-        border-radius: 8px;
-        padding: 28px 36px;
+        border-radius: 10px;
+        padding: 40px 56px;
         text-align: center;
         cursor: pointer;
         transition: border-color .15s, transform .1s;
-        min-width: 180px;
+        min-width: 280px;
       }
-      .gs-card:hover { border-color: #007acc; transform: translateY(-2px); }
-      .gs-card h2 { margin: 0 0 8px; font-size: 18px; color: #9cdcfe; }
-      .gs-card p  { margin: 0; font-size: 12px; color: #858585; }
+      .gs-card:hover { border-color: #007acc; transform: translateY(-4px); }
+      .gs-card h2 { margin: 0 0 12px; font-size: 26px; color: #9cdcfe; }
+      .gs-card p  { margin: 0; font-size: 15px; color: #858585; }
     </style>
     <h1>Workday Boredom Buster</h1>
     <p>Choose your disguise</p>
@@ -114,9 +115,13 @@ function startSnake(): void {
   })
 
   const inputRouter = new InputRouter()
-  inputRouter.bind((input: GameInput) => {
+  inputRouter.bind((input: GameInput, char?: string) => {
     if (input === GameInput.Escape) {
       teardown()
+      return
+    }
+    if (input === GameInput.TypeCharacter && (char === 'p' || char === 'P')) {
+      excelSkin.toggleBossMode()
       return
     }
     if (stateMachine.state === GameStatus.Running) {
