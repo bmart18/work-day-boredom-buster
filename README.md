@@ -174,4 +174,14 @@ No server required.
 
 ## License
 
-I.D.K.
+Copyright (c) 2026 Brad Martin
+
+All rights reserved.
+
+This source code and all associated files are the exclusive property of the author.
+
+No permission is granted to use, copy, modify, merge, publish, distribute,
+sublicense, or sell copies of this software without explicit written permission
+from the author.
+
+Unauthorized use of this code is strictly prohibited.
