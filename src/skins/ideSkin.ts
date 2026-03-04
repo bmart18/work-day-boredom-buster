@@ -59,7 +59,6 @@ function difficultyLabel(level: number): string {
  */
 export class IdeSkin implements Skin {
   private container: HTMLElement | null = null
-  private codeLineEl: HTMLElement | null = null
   private wpmEl: HTMLElement | null = null
   private accuracyEl: HTMLElement | null = null
   private scoreEl: HTMLElement | null = null
@@ -69,7 +68,12 @@ export class IdeSkin implements Skin {
   private gameOverEl: HTMLElement | null = null
   private gameOverScoreEl: HTMLElement | null = null
   private gameOverWpmEl: HTMLElement | null = null
+  private gutterEl: HTMLElement | null = null
+  private linesEl: HTMLElement | null = null
+  private scrollAreaEl: HTMLElement | null = null
   private maxTimeMs: number = 60_000
+  private completedLines: string[] = []
+  private prevPrompt: string = ''
 
   initialize(): void {
     this.injectStyles()
@@ -83,7 +87,6 @@ export class IdeSkin implements Skin {
     root.appendChild(container)
     this.container = container
 
-    this.codeLineEl = container.querySelector('.ide-code-line')
     this.wpmEl = container.querySelector('.ide-stat-wpm')
     this.accuracyEl = container.querySelector('.ide-stat-acc')
     this.scoreEl = container.querySelector('.ide-stat-score')
@@ -93,6 +96,11 @@ export class IdeSkin implements Skin {
     this.gameOverEl = container.querySelector('.ide-gameover')
     this.gameOverScoreEl = container.querySelector('.ide-gameover-score')
     this.gameOverWpmEl = container.querySelector('.ide-gameover-wpm')
+    this.gutterEl = container.querySelector('.ide-gutter')
+    this.linesEl = container.querySelector('.ide-lines')
+    this.scrollAreaEl = container.querySelector('.ide-scroll-area')
+    this.completedLines = []
+    this.prevPrompt = ''
   }
 
   render(gameState: GameState): void {
@@ -101,10 +109,14 @@ export class IdeSkin implements Skin {
 
     const { prompt, typed, wpm, accuracy, score, status, difficulty, timeRemainingMs } = state
 
-    // Update editor code line
-    if (this.codeLineEl) {
-      this.codeLineEl.innerHTML = buildCodeHTML(prompt, typed)
+    // Track completed lines: when prompt changes, the previous one was fully typed
+    if (this.prevPrompt !== '' && prompt !== this.prevPrompt) {
+      this.completedLines.push(this.prevPrompt)
     }
+    this.prevPrompt = prompt
+
+    // Update scrolling editor lines
+    this.updateEditorLines(prompt, typed)
 
     // Update status bar stats
     if (this.wpmEl) this.wpmEl.textContent = `WPM: ${wpm}`
@@ -145,10 +157,44 @@ export class IdeSkin implements Skin {
   destroy(): void {
     this.container?.remove()
     this.container = null
+    this.completedLines = []
+    this.prevPrompt = ''
     document.getElementById(STYLE_ID)?.remove()
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
+
+  /** Rebuild the scrolling editor gutter and lines, then pin to bottom. */
+  private updateEditorLines(prompt: string, typed: string): void {
+    if (!this.gutterEl || !this.linesEl) return
+
+    const HISTORY_VISIBLE = 10
+    const history = this.completedLines.slice(-HISTORY_VISIBLE)
+    const startLineNum = Math.max(1, this.completedLines.length - history.length + 1)
+
+    let gutterHTML = ''
+    let linesHTML = ''
+
+    // Render completed (history) lines
+    for (let i = 0; i < history.length; i++) {
+      const lineNum = startLineNum + i
+      gutterHTML += `<div class="ide-line-num">${lineNum}</div>`
+      linesHTML += `<div class="ide-line"><span class="ide-completed-line">${escapeHtml(history[i])}</span></div>`
+    }
+
+    // Render active line
+    const activeLineNum = this.completedLines.length + 1
+    gutterHTML += `<div class="ide-line-num ide-line-active">${activeLineNum}</div>`
+    linesHTML += `<div class="ide-line ide-line-active"><span class="ide-code-line">${buildCodeHTML(prompt, typed)}</span></div>`
+
+    this.gutterEl.innerHTML = gutterHTML
+    this.linesEl.innerHTML = linesHTML
+
+    // Scroll to keep the active line visible
+    if (this.scrollAreaEl) {
+      this.scrollAreaEl.scrollTop = this.scrollAreaEl.scrollHeight
+    }
+  }
 
   private buildHTML(): string {
     return `
@@ -196,21 +242,9 @@ export class IdeSkin implements Skin {
             <div class="ide-timer-bar-fill"></div>
           </div>
           <div class="ide-editor">
-            <div class="ide-gutter">
-              <div class="ide-line-num">1</div>
-              <div class="ide-line-num ide-line-active">2</div>
-              <div class="ide-line-num">3</div>
-              <div class="ide-line-num">4</div>
-              <div class="ide-line-num">5</div>
-            </div>
-            <div class="ide-lines">
-              <div class="ide-line"><span class="ide-comment">// Task: type the code snippet below exactly as shown</span></div>
-              <div class="ide-line ide-line-active">
-                <span class="ide-code-line"></span>
-              </div>
-              <div class="ide-line"></div>
-              <div class="ide-line"><span class="ide-comment">// Correct characters light up green — wrong keystrokes cost accuracy</span></div>
-              <div class="ide-line"><span class="ide-comment">// Complete each snippet to score points and unlock harder challenges</span></div>
+            <div class="ide-scroll-area">
+              <div class="ide-gutter"></div>
+              <div class="ide-lines"></div>
             </div>
           </div>
         </div>
@@ -246,22 +280,22 @@ export class IdeSkin implements Skin {
     style.id = STYLE_ID
     style.textContent = `
       * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; overflow: hidden; }
 
       #ide-skin {
         font-family: ${EDITOR_FONT};
         font-size: 13px;
-        display: inline-flex;
+        display: flex;
         flex-direction: column;
-        width: 780px;
-        height: 520px;
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
         background: #1e1e1e;
         color: #d4d4d4;
-        border-radius: 6px;
         overflow: hidden;
         user-select: none;
         outline: none;
-        position: relative;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       }
 
       /* ── Title bar ──────────────────────────────────────── */
@@ -418,8 +452,19 @@ export class IdeSkin implements Skin {
         display: flex;
         overflow: hidden;
         background: #1e1e1e;
-        padding-top: 24px;
       }
+      .ide-scroll-area {
+        display: flex;
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-top: 24px;
+        padding-bottom: 40px;
+        scroll-behavior: smooth;
+      }
+      .ide-scroll-area::-webkit-scrollbar { width: 8px; }
+      .ide-scroll-area::-webkit-scrollbar-track { background: #1e1e1e; }
+      .ide-scroll-area::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
       .ide-gutter {
         background: #1e1e1e;
         color: #858585;
@@ -445,6 +490,7 @@ export class IdeSkin implements Skin {
       }
       .ide-line-active { background: #2a2d2e; }
       .ide-comment { color: #6a9955; }
+      .ide-completed-line { color: #4ec9b0; opacity: 0.55; }
 
       /* ── Typed-character states ─────────────────────────── */
       .ide-char-correct { color: #4ec9b0; }

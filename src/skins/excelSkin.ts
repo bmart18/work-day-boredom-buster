@@ -4,10 +4,10 @@ import type { SnakeGameState, SnakeCellType } from '../games/snakeGame'
 
 const STYLE_ID = 'xl-skin-styles'
 
-const CELL_W = 30
-const CELL_H = 22
-const ROW_HEADER_W = 36
-const COL_HEADER_H = 20
+const CELL_W = 64
+const CELL_H = 24
+const ROW_HEADER_W = 40
+const COL_HEADER_H = 22
 
 /** Convert a zero-based column index to an Excel-style letter (A, B, … Z, AA, …). */
 function colLabel(index: number): string {
@@ -42,9 +42,12 @@ export class ExcelSkin implements Skin {
   private nameBox: HTMLElement | null = null
   private scoreEl: HTMLElement | null = null
   private highScoreEl: HTMLElement | null = null
+  private hintEl: HTMLElement | null = null
   private gameOverEl: HTMLElement | null = null
   private gameOverScoreEl: HTMLElement | null = null
   private prevGrid: SnakeCellType[][] = []
+  private bossMode = false
+  private bossData: string[][] = []
 
   initialize(): void {
     this.injectStyles()
@@ -64,6 +67,7 @@ export class ExcelSkin implements Skin {
     this.nameBox = container.querySelector('.xl-name-box')
     this.scoreEl = container.querySelector('.xl-status-score')
     this.highScoreEl = container.querySelector('.xl-status-highscore')
+    this.hintEl = container.querySelector('.xl-status-hint')
     this.gameOverEl = container.querySelector('.xl-gameover')
     this.gameOverScoreEl = container.querySelector('.xl-gameover-score')
 
@@ -73,11 +77,18 @@ export class ExcelSkin implements Skin {
       Array.from(row.querySelectorAll<HTMLElement>('.xl-cell')),
     )
     this.prevGrid = []
+    this.bossMode = false
+    this.bossData = generateBossData(DEFAULT_ROWS, DEFAULT_COLS)
   }
 
   render(gameState: GameState): void {
     const state = gameState as unknown as SnakeGameState & { highScore?: number }
     if (!this.container || !state.grid) return
+
+    if (this.bossMode) {
+      this.renderBossMode()
+      return
+    }
 
     const { grid, score, status, rows, cols } = state
     const highScore = state.highScore ?? 0
@@ -101,6 +112,7 @@ export class ExcelSkin implements Skin {
         if (prevRow && prevRow[c] === cellType) continue
         const el = this.cellEls[r][c]
         el.className = 'xl-cell' + (CELL_CLASS[cellType] ? ' ' + CELL_CLASS[cellType] : '')
+        el.textContent = ''
       }
     }
     this.prevGrid = grid.map((row) => [...row])
@@ -108,11 +120,37 @@ export class ExcelSkin implements Skin {
     // Status bar
     if (this.scoreEl) this.scoreEl.textContent = `Score: ${score}`
     if (this.highScoreEl) this.highScoreEl.textContent = `High Score: ${highScore}`
+    if (this.hintEl) this.hintEl.textContent = 'Esc: Menu  |  P: Toggle view'
 
     // Game-over overlay
     if (this.gameOverEl) {
       this.gameOverEl.style.display = status === 'gameover' ? 'flex' : 'none'
       if (this.gameOverScoreEl) this.gameOverScoreEl.textContent = `Score: ${score}`
+    }
+  }
+
+  /** Toggles boss-key mode: hides the snake and shows a realistic spreadsheet. */
+  toggleBossMode(): void {
+    this.bossMode = !this.bossMode
+    if (this.bossMode) {
+      // Render immediately even if the game loop is paused (e.g. GameOver state)
+      this.renderBossMode()
+    } else {
+      // Clear boss content and force full re-render of snake
+      for (let r = 0; r < this.cellEls.length; r++) {
+        for (let c = 0; c < (this.cellEls[r]?.length ?? 0); c++) {
+          const el = this.cellEls[r][c]
+          el.textContent = ''
+          el.className = 'xl-cell'
+          el.style.textAlign = ''
+          el.style.paddingRight = ''
+          el.style.fontSize = ''
+          el.style.color = ''
+          el.style.fontWeight = ''
+        }
+      }
+      this.prevGrid = [] // force full re-render next frame
+      if (this.gameOverEl) this.gameOverEl.style.display = 'none'
     }
   }
 
@@ -122,11 +160,30 @@ export class ExcelSkin implements Skin {
     // Cell-click input routing is reserved for a future phase.
   }
 
+  private renderBossMode(): void {
+    for (let r = 0; r < this.cellEls.length; r++) {
+      for (let c = 0; c < (this.cellEls[r]?.length ?? 0); c++) {
+        const el = this.cellEls[r][c]
+        const val = this.bossData[r]?.[c] ?? ''
+        el.className = c === 0 ? 'xl-cell xl-cell-boss xl-cell-boss-label' : 'xl-cell xl-cell-boss'
+        el.textContent = val
+      }
+    }
+    if (this.nameBox) this.nameBox.textContent = 'D4'
+    if (this.formulaInput) this.formulaInput.textContent = '=SUM(B4:D4)'
+    if (this.scoreEl) this.scoreEl.textContent = 'Average: 14,582'
+    if (this.highScoreEl) this.highScoreEl.textContent = 'Sum: 87,492'
+    if (this.hintEl) this.hintEl.textContent = 'Zoom: 100%'
+    if (this.gameOverEl) this.gameOverEl.style.display = 'none'
+  }
+
   destroy(): void {
     this.container?.remove()
     this.container = null
     this.cellEls = []
     this.prevGrid = []
+    this.bossMode = false
+    this.bossData = []
     document.getElementById(STYLE_ID)?.remove()
   }
 
@@ -188,7 +245,7 @@ export class ExcelSkin implements Skin {
         <span>Ready</span>
         <span class="xl-status-score">Score: 0</span>
         <span class="xl-status-highscore">High Score: 0</span>
-        <span class="xl-status-hint">Esc: Switch game</span>
+        <span class="xl-status-hint">Esc: Menu  |  P: Toggle view</span>
       </div>
       <div class="xl-gameover" style="display:none">
         <div class="xl-gameover-box">
@@ -206,16 +263,19 @@ export class ExcelSkin implements Skin {
     style.id = STYLE_ID
     style.textContent = `
       * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; overflow: hidden; }
 
       #excel-skin {
         font-family: Calibri, 'Segoe UI', Arial, sans-serif;
         font-size: 11px;
-        display: inline-flex;
+        display: flex;
         flex-direction: column;
-        border: 1px solid #ababab;
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
         user-select: none;
         outline: none;
-        position: relative;
         background: #f0f0f0;
       }
 
@@ -317,7 +377,7 @@ export class ExcelSkin implements Skin {
       /* ── Grid ──────────────────────────────────────────────── */
       .xl-grid-wrap {
         overflow: auto;
-        flex-shrink: 0;
+        flex: 1;
       }
       .xl-header-row,
       .xl-data-row {
@@ -327,35 +387,35 @@ export class ExcelSkin implements Skin {
         width: ${ROW_HEADER_W}px;
         min-width: ${ROW_HEADER_W}px;
         height: ${COL_HEADER_H}px;
-        background: #e2e2e2;
-        border-right: 1px solid #ababab;
-        border-bottom: 1px solid #ababab;
+        background: #c8c8c8;
+        border-right: 1px solid #a0a0a0;
+        border-bottom: 1px solid #a0a0a0;
         flex-shrink: 0;
       }
       .xl-col-header {
         width: ${CELL_W}px;
         min-width: ${CELL_W}px;
         height: ${COL_HEADER_H}px;
-        background: #e2e2e2;
-        border-right: 1px solid #d0d0d0;
-        border-bottom: 1px solid #ababab;
+        background: #c8c8c8;
+        border-right: 1px solid #b8b8b8;
+        border-bottom: 1px solid #a0a0a0;
         text-align: center;
         line-height: ${COL_HEADER_H}px;
         font-size: 10px;
-        color: #444;
+        color: #555;
         flex-shrink: 0;
       }
       .xl-row-header {
         width: ${ROW_HEADER_W}px;
         min-width: ${ROW_HEADER_W}px;
         height: ${CELL_H}px;
-        background: #e2e2e2;
-        border-right: 1px solid #ababab;
-        border-bottom: 1px solid #d0d0d0;
+        background: #d0d0d0;
+        border-right: 1px solid #a0a0a0;
+        border-bottom: 1px solid #b8b8b8;
         text-align: center;
         line-height: ${CELL_H}px;
         font-size: 10px;
-        color: #444;
+        color: #555;
         flex-shrink: 0;
       }
       .xl-cell {
@@ -366,10 +426,22 @@ export class ExcelSkin implements Skin {
         border-right: 1px solid #d0d0d0;
         border-bottom: 1px solid #d0d0d0;
         flex-shrink: 0;
+        overflow: hidden;
       }
       .xl-cell-head  { background: #1a5c38; }
       .xl-cell-snake { background: #70ad47; }
       .xl-cell-food  { background: #e03b24; }
+      .xl-cell-boss  {
+        background: #fff;
+        color: #222;
+        font-size: 10px;
+        text-align: right;
+        padding-right: 3px;
+        line-height: ${CELL_H}px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .xl-cell-boss-label { text-align: left; padding-right: 0; padding-left: 3px; }
 
       /* ── Sheet tabs ────────────────────────────────────────── */
       .xl-sheettabs {
@@ -454,5 +526,47 @@ export class ExcelSkin implements Skin {
 }
 
 /** Default grid dimensions used when building the initial HTML. */
-const DEFAULT_ROWS = 20
-const DEFAULT_COLS = 20
+const DEFAULT_ROWS = 30
+const DEFAULT_COLS = 26
+
+// ── Boss-mode spreadsheet data ────────────────────────────────────────────────
+
+const BOSS_COL_HEADERS = ['', 'Jan', 'Feb', 'Mar', 'Q1 Total', 'Apr', 'May', 'Jun', 'Q2 Total', 'Budget', 'Forecast', 'Variance', '%Δ']
+const BOSS_ROW_LABELS = [
+  'Revenue', 'Cost of Sales', 'Gross Profit', 'Marketing', 'R&D', 'G&A',
+  'EBITDA', 'Depreciation', 'EBIT', 'Interest', 'EBT', 'Tax (28%)', 'Net Income',
+  '', 'Headcount', 'Productivity', 'Utilisation', '', 'Pipeline', 'Won Deals',
+]
+
+function generateBossData(rows: number, cols: number): string[][] {
+  const data: string[][] = []
+  for (let r = 0; r < rows; r++) {
+    const row: string[] = []
+    for (let c = 0; c < cols; c++) {
+      if (r === 0) {
+        row.push(c < BOSS_COL_HEADERS.length ? BOSS_COL_HEADERS[c] : '')
+      } else if (c === 0) {
+        row.push(r <= BOSS_ROW_LABELS.length ? (BOSS_ROW_LABELS[r - 1] ?? '') : '')
+      } else if (r <= BOSS_ROW_LABELS.length && (BOSS_ROW_LABELS[r - 1] ?? '') === '') {
+        row.push('')
+      } else if (r > 0 && c > 0) {
+        const seed = r * 317 + c * 131 + 4219
+        const base = ((seed * 48271) % 32767) % 9000 + 1000
+        if (c === 13) {
+          // % column
+          const pct = (((seed * 6271) % 100) - 50) / 10
+          row.push(`${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`)
+        } else if (c === 5 || c === 9) {
+          // Quarter totals / Budget
+          row.push(String(Math.round(base * 3.1)).replace(/\B(?=(\d{3})+(?!\d))/g, ','))
+        } else {
+          row.push(String(base).replace(/\B(?=(\d{3})+(?!\d))/g, ','))
+        }
+      } else {
+        row.push('')
+      }
+    }
+    data.push(row)
+  }
+  return data
+}
